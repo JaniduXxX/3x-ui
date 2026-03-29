@@ -1,0 +1,326 @@
+{{ define "page/head_start" }}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="{{ .base_path }}assets/ant-design-vue/antd.min.css">
+  <link rel="stylesheet" href="{{ .base_path }}assets/css/custom.min.css?{{ .cur_ver }}">
+  <style>
+    [v-cloak] {
+      display: none;
+    }
+    /* vazirmatn-regular - arabic_latin_latin-ext */
+    @font-face {
+      font-display: swap;
+      font-family: 'Vazirmatn';
+      font-style: normal;
+      font-weight: 400;
+      src: url('{{ .base_path }}assets/Vazirmatn-UI-NL-Regular.woff2') format('woff2');
+      unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFC, U+0030-0039;
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Vazirmatn', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    /* mobile touch scrolling for tabs */
+    @media (max-width: 576px) {
+      .ant-tabs-nav-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        overscroll-behavior-x: contain;
+        white-space: nowrap;
+        max-width: 100%;
+        padding: 0 !important; /* Remove padding for arrows */
+      }
+      .ant-tabs-nav-wrap {
+        overflow: visible !important;
+        padding: 0 !important;
+      }
+      .ant-tabs-nav-scroll {
+        overflow: visible !important;
+        box-shadow: none !important;
+      }
+      .ant-tabs-nav {
+         display: flex !important;
+         transform: none !important; /* Disable JS transform */
+         width: auto !important;
+         margin: 0 !important;
+      }
+      .ant-tabs-tab-prev,
+      .ant-tabs-tab-next {
+        display: none !important; /* Hide arrows */
+      }
+      .ant-tabs-nav-container::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  </style>
+  <title>{{ .host }} – {{ i18n .title}}</title>
+  <style>
+    /* Panel Enhancements */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  </style>
+{{ end }}
+
+{{ define "page/head_end" }}
+</head>
+{{ end }}
+
+{{ define "page/body_start" }}
+<body>
+  <div id="message"></div>
+{{ end }}
+
+{{ define "page/body_scripts" }}
+<script src="{{ .base_path }}assets/vue/vue.min.js?{{ .cur_ver }}"></script>
+<script src="{{ .base_path }}assets/moment/moment.min.js"></script>
+<script src="{{ .base_path }}assets/ant-design-vue/antd.min.js"></script>
+<script src="{{ .base_path }}assets/axios/axios.min.js?{{ .cur_ver }}"></script>
+<script src="{{ .base_path }}assets/qs/qs.min.js"></script>
+<script src="{{ .base_path }}assets/js/axios-init.js?{{ .cur_ver }}"></script>
+<script src="{{ .base_path }}assets/js/util/index.js?{{ .cur_ver }}"></script>
+<script>
+  const basePath = '{{ .base_path }}';
+  axios.defaults.baseURL = basePath;
+</script>
+<script src="{{ .base_path }}assets/js/websocket.js?{{ .cur_ver }}"></script>
+{{ end }}
+  
+{{ define "page/body_end" }}
+</body>
+</html>
+{{ end }}
+{{ define "panel/enhanced_styles" }}
+<style>
+/* ── 3X-UI Panel Enhancements ── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+/* Global font upgrade */
+body, .ant-menu, .ant-card, .ant-table, .ant-btn, .ant-input,
+.ant-select, .ant-tabs, .ant-collapse {
+  font-family: 'Outfit', system-ui, sans-serif !important;
+}
+
+/* ── Dark theme enhancements ── */
+.dark .ant-layout {
+  background: linear-gradient(160deg, #07101f 0%, #050811 100%) !important;
+}
+
+.dark .ant-layout-header {
+  background: rgba(7, 16, 31, 0.95) !important;
+  border-bottom: 1px solid rgba(0, 245, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Cards */
+.dark .ant-card {
+  background: rgba(10, 15, 35, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35) !important;
+  transition: border-color 0.3s, box-shadow 0.3s !important;
+}
+
+.dark .ant-card:hover {
+  border-color: rgba(0, 245, 255, 0.2) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 245, 255, 0.06) !important;
+}
+
+.dark .ant-card-head {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: linear-gradient(90deg, rgba(0, 245, 255, 0.04), rgba(191, 95, 255, 0.04)) !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+/* Tables */
+.dark .ant-table-thead > tr > th {
+  background: rgba(0, 245, 255, 0.04) !important;
+  border-bottom: 1px solid rgba(0, 245, 255, 0.1) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  color: rgba(200, 230, 255, 0.85) !important;
+}
+
+.dark .ant-table-tbody > tr:hover > td {
+  background: rgba(0, 245, 255, 0.04) !important;
+}
+
+.dark .ant-table-tbody > tr > td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  transition: background 0.2s !important;
+}
+
+/* Buttons */
+.dark .ant-btn-primary {
+  background: linear-gradient(135deg, #006688, #1890ff) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.25) !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.dark .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #0088aa, #40a9ff) !important;
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+.dark .ant-btn:not(.ant-btn-primary) {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(200, 220, 255, 0.85) !important;
+  transition: all 0.25s !important;
+}
+
+.dark .ant-btn:not(.ant-btn-primary):hover {
+  border-color: rgba(0, 245, 255, 0.35) !important;
+  color: #00f5ff !important;
+  background: rgba(0, 245, 255, 0.06) !important;
+}
+
+/* Inputs */
+.dark .ant-input,
+.dark .ant-input-number,
+.dark .ant-select-selection {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(200, 220, 255, 0.9) !important;
+  border-radius: 8px !important;
+  transition: border-color 0.25s, box-shadow 0.25s !important;
+}
+
+.dark .ant-input:focus,
+.dark .ant-input:hover,
+.dark .ant-input-number:hover,
+.dark .ant-input-number-focused,
+.dark .ant-select-selection:hover,
+.dark .ant-select-open .ant-select-selection {
+  border-color: rgba(0, 245, 255, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.08) !important;
+}
+
+/* Tags */
+.dark .ant-tag {
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+}
+
+/* Progress bars */
+.dark .ant-progress-bg {
+  background: linear-gradient(90deg, #00f5ff, #bf5fff) !important;
+}
+
+/* Statistic cards */
+.dark .ant-statistic-title {
+  color: rgba(180, 210, 240, 0.55) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+}
+
+.dark .ant-statistic-content {
+  color: #e8f4ff !important;
+  font-family: 'Space Mono', 'Outfit', monospace !important;
+}
+
+/* Tabs */
+.dark .ant-tabs-bar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  margin-bottom: 16px !important;
+}
+
+.dark .ant-tabs-tab {
+  color: rgba(180, 210, 240, 0.6) !important;
+  font-weight: 500 !important;
+  transition: color 0.25s !important;
+}
+
+.dark .ant-tabs-tab:hover {
+  color: #00f5ff !important;
+}
+
+.dark .ant-tabs-tab-active {
+  color: #00f5ff !important;
+  font-weight: 600 !important;
+}
+
+.dark .ant-tabs-ink-bar {
+  background: linear-gradient(90deg, #00f5ff, #bf5fff) !important;
+  height: 2px !important;
+  border-radius: 2px !important;
+}
+
+/* Collapse */
+.dark .ant-collapse {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+.dark .ant-collapse-header {
+  font-weight: 600 !important;
+  color: rgba(200, 220, 255, 0.85) !important;
+  letter-spacing: 0.2px !important;
+  transition: color 0.25s !important;
+}
+
+.dark .ant-collapse-header:hover {
+  color: #00f5ff !important;
+}
+
+.dark .ant-collapse > .ant-collapse-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .ant-collapse-content {
+  background: rgba(0, 0, 0, 0.15) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Badge */
+.dark .ant-badge-status-dot {
+  box-shadow: 0 0 6px currentColor !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0, 245, 255, 0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 245, 255, 0.3); }
+
+/* ── Light theme subtle enhancements ── */
+.light .ant-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06) !important;
+  transition: box-shadow 0.3s, border-color 0.3s !important;
+}
+
+.light .ant-card:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1) !important;
+}
+
+.light .ant-btn-primary {
+  background: linear-gradient(135deg, #1890ff, #722ed1) !important;
+  border: none !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.25) !important;
+  transition: all 0.3s !important;
+}
+
+.light .ant-btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+.light .ant-tabs-ink-bar {
+  background: linear-gradient(90deg, #1890ff, #722ed1) !important;
+}
+</style>
+{{ end }}

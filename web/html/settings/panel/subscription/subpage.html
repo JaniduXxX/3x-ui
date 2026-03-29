@@ -1,0 +1,413 @@
+{{ template "page/head_start" .}}
+<script src="{{ .base_path }}assets/moment/moment.min.js"></script>
+<script src="{{ .base_path }}assets/moment/moment-jalali.min.js?{{ .cur_ver }}"></script>
+<script src="{{ .base_path }}assets/vue/vue.min.js?{{ .cur_ver }}"></script>
+<script src="{{ .base_path }}assets/ant-design-vue/antd.min.js"></script>
+<script src="{{ .base_path }}assets/js/util/index.js?{{ .cur_ver }}"></script>
+<script src="{{ .base_path }}assets/qrcode/qrious2.min.js?{{ .cur_ver }}"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --nc: #00f5ff;
+  --np: #bf5fff;
+  --ng: #00ff88;
+  --nr: #ff3366;
+  --ngd:#ffd700;
+  --bg: #050811;
+  --bgc:#0a0f1e;
+  --bgg:rgba(10,15,35,0.85);
+  --bdr:rgba(0,245,255,0.18);
+  --tp: #e8f4ff;
+  --tm: rgba(180,210,240,0.55);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'Outfit',system-ui,sans-serif;color:var(--tp);min-height:100vh;overflow-x:hidden}
+.sub-bg{position:fixed;inset:0;z-index:0;background:linear-gradient(135deg,#050811 0%,#07101f 50%,#060c18 100%);overflow:hidden}
+.sub-bg::before{content:'';position:absolute;inset:-50%;background-image:linear-gradient(rgba(0,245,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,.04) 1px,transparent 1px);background-size:60px 60px;animation:gridDrift 18s linear infinite}
+@keyframes gridDrift{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.18;pointer-events:none;animation:orbFloat 12s ease-in-out infinite alternate}
+.orb-1{width:500px;height:500px;background:var(--nc);top:-150px;left:-150px;animation-delay:0s}
+.orb-2{width:400px;height:400px;background:var(--np);bottom:-100px;right:-100px;animation-delay:-4s}
+.orb-3{width:300px;height:300px;background:var(--ng);top:40%;left:60%;animation-delay:-8s}
+@keyframes orbFloat{from{transform:translate(0,0) scale(1)}to{transform:translate(30px,40px) scale(1.08)}}
+#particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35}
+.sub-wrapper{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px}
+.sub-topbar{width:100%;max-width:680px;display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding:12px 20px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:14px;backdrop-filter:blur(12px);animation:slideDown .5s ease both}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.topbar-logo{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:2px;color:var(--nc);text-shadow:0 0 12px rgba(0,245,255,.6)}
+.topbar-actions{display:flex;gap:10px;align-items:center}
+.settings-btn{width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--tm);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.settings-btn:hover{border-color:rgba(0,245,255,.4);color:var(--nc);background:rgba(0,245,255,.08)}
+.settings-btn svg{width:18px;height:18px}
+.sub-card{width:100%;max-width:680px;background:var(--bgg);border:1px solid var(--bdr);border-radius:24px;backdrop-filter:blur(20px);overflow:hidden;box-shadow:0 0 0 1px rgba(0,245,255,.08),0 20px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);animation:fadeUp .6s ease .1s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.sub-card-header{padding:28px 28px 20px;background:linear-gradient(135deg,rgba(0,245,255,.06) 0%,rgba(191,95,255,.06) 100%);border-bottom:1px solid var(--bdr);position:relative;overflow:hidden}
+.sub-card-header::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--nc),var(--np),transparent);animation:scanLine 3s ease-in-out infinite}
+@keyframes scanLine{0%,100%{opacity:.4}50%{opacity:1}}
+.sub-title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sub-title{font-size:22px;font-weight:700;color:var(--tp);letter-spacing:-.3px}
+.sub-id-badge{font-family:'Space Mono',monospace;font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(0,245,255,.1);border:1px solid rgba(0,245,255,.3);color:var(--nc);letter-spacing:1px}
+.status-hero{display:flex;align-items:center;gap:8px;margin-top:10px}
+.status-dot{width:8px;height:8px;border-radius:50%;position:relative}
+.status-dot.active{background:var(--ng);box-shadow:0 0 10px var(--ng)}
+.status-dot.inactive{background:var(--nr);box-shadow:0 0 10px var(--nr)}
+.status-dot.unlimited{background:var(--np);box-shadow:0 0 10px var(--np)}
+.status-dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid currentColor;opacity:.4;animation:ping 1.5s ease-out infinite}
+@keyframes ping{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.2);opacity:0}}
+.status-text{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.status-text.active{color:var(--ng)}
+.status-text.inactive{color:var(--nr)}
+.status-text.unlimited{color:var(--np)}
+.qr-section{padding:28px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.04)}
+.qr-block{display:flex;flex-direction:column;align-items:center;gap:12px}
+.qr-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--np)}
+.qr-frame{position:relative;padding:3px;border-radius:16px;background:linear-gradient(135deg,var(--nc),var(--np));cursor:pointer;transition:transform .3s ease,box-shadow .3s ease}
+.qr-frame:hover{transform:scale(1.04);box-shadow:0 0 30px rgba(0,245,255,.3)}
+.qr-frame::before{content:'';position:absolute;inset:-1px;border-radius:17px;background:linear-gradient(135deg,var(--nc),var(--np));z-index:-1;opacity:0;animation:qrGlow 2.5s ease-in-out infinite alternate}
+@keyframes qrGlow{from{opacity:0;filter:blur(6px)}to{opacity:.6;filter:blur(12px)}}
+.qr-inner{background:#fff;border-radius:13px;padding:10px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.qr-inner canvas{display:block;border-radius:8px}
+.qr-hint{font-size:11px;color:var(--tm);letter-spacing:.5px}
+.traffic-section{padding:24px 28px;border-bottom:1px solid rgba(255,255,255,.04)}
+.section-label{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--tm);margin-bottom:16px}
+.gauge-row{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+.gauge-wrap{position:relative;width:110px;height:110px;flex-shrink:0}
+.gauge-svg{width:110px;height:110px;transform:rotate(-90deg)}
+.gauge-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:8}
+.gauge-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke:url(#gaugeGrad);transition:stroke-dashoffset 1.4s cubic-bezier(.25,.46,.45,.94)}
+.gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge-pct{font-size:20px;font-weight:800;font-family:'Space Mono',monospace;color:var(--tp);line-height:1}
+.gauge-sub{font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tm);margin-top:2px}
+.stat-bars{flex:1;min-width:180px;display:flex;flex-direction:column;gap:12px}
+.stat-bar-header{display:flex;justify-content:space-between;margin-bottom:5px}
+.stat-bar-label{font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--tm)}
+.stat-bar-val{font-size:11px;font-family:'Space Mono',monospace;color:var(--tp);font-weight:700}
+.stat-bar-track{height:5px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:10px;transition:width 1.2s cubic-bezier(.25,.46,.45,.94)}
+.bar-down{background:linear-gradient(90deg,var(--nc),#0099cc)}
+.bar-up{background:linear-gradient(90deg,var(--np),#8844cc)}
+.bar-used{background:linear-gradient(90deg,var(--ng),#00cc66)}
+.info-section{padding:24px 28px;border-bottom:1px solid rgba(255,255,255,.04)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info-cell{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px 14px;transition:border-color .3s,background .3s}
+.info-cell:hover{background:rgba(0,245,255,.04);border-color:rgba(0,245,255,.2)}
+.info-cell-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--tm);margin-bottom:4px}
+.info-cell-val{font-size:14px;font-weight:600;color:var(--tp);font-family:'Space Mono',monospace}
+.links-section{padding:24px 28px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;flex-direction:column;gap:12px}
+.link-card{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .3s ease}
+.link-card:hover{transform:translateY(-2px)}
+.link-card-inner{background:rgba(0,0,0,.3);border:1px solid rgba(0,245,255,.12);border-radius:14px;overflow:hidden;transition:border-color .3s}
+.link-card:hover .link-card-inner{border-color:rgba(0,245,255,.35)}
+.link-card.copied .link-card-inner{border-color:var(--ng);box-shadow:0 0 20px rgba(0,255,136,.25)}
+.link-card-header{background:linear-gradient(90deg,rgba(0,245,255,.1),rgba(191,95,255,.1));padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.link-card-name{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--nc)}
+.link-copy-hint{font-size:10px;color:var(--tm);display:flex;align-items:center;gap:5px}
+.link-copy-hint svg{width:12px;height:12px}
+.link-url{padding:12px 14px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.6;color:rgba(180,210,240,.75);word-break:break-all}
+.apps-section{padding:24px 28px}
+.apps-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.app-btn-wrap{position:relative}
+.app-btn{width:100%;padding:14px 18px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--tp);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s ease;position:relative;overflow:hidden}
+.app-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.05));opacity:0;transition:opacity .3s}
+.app-btn:hover::before{opacity:1}
+.app-btn.android{border-color:rgba(0,255,136,.25)}
+.app-btn.android:hover{background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.5);box-shadow:0 0 20px rgba(0,255,136,.15);transform:translateY(-2px)}
+.app-btn.ios{border-color:rgba(0,245,255,.25)}
+.app-btn.ios:hover{background:rgba(0,245,255,.08);border-color:rgba(0,245,255,.5);box-shadow:0 0 20px rgba(0,245,255,.15);transform:translateY(-2px)}
+.app-btn svg{width:20px;height:20px}
+.app-btn .chevron{width:14px;height:14px;margin-left:auto}
+.app-dropdown{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:100;background:#0d1428;border:1px solid rgba(0,245,255,.2);border-radius:14px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.7);animation:dropIn .2s ease both}
+@keyframes dropIn{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.app-dropdown-item{padding:11px 16px;font-size:13px;font-weight:500;color:var(--tp);cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.04)}
+.app-dropdown-item:last-child{border-bottom:none}
+.app-dropdown-item:hover{background:rgba(0,245,255,.07);color:var(--nc)}
+.app-dropdown-item::before{content:'›';color:var(--nc);font-size:16px;opacity:.6}
+.copy-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);padding:10px 22px;background:rgba(0,255,136,.15);border:1px solid rgba(0,255,136,.5);border-radius:30px;font-size:13px;font-weight:600;color:var(--ng);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:9999;letter-spacing:.5px}
+.copy-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,245,255,.2);border-radius:3px}
+@media(max-width:520px){
+  .sub-card-header,.qr-section,.traffic-section,.info-section,.links-section,.apps-section{padding:18px}
+  .apps-grid{grid-template-columns:1fr}
+  .gauge-row{justify-content:center}
+  .info-grid{grid-template-columns:1fr}
+}
+</style>
+
+{{ template "page/head_end" .}}
+{{ template "page/body_start" .}}
+
+<div class="sub-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<canvas id="particle-canvas"></canvas>
+<div class="copy-toast" id="copy-toast">✓ Copied to clipboard</div>
+
+<div id="app" v-cloak>
+  <div class="sub-wrapper">
+
+    <div class="sub-topbar">
+      <span class="topbar-logo">⬡ 3X-UI</span>
+      <div class="topbar-actions">
+        <a-popover :overlay-class-name="themeSwitcher.currentTheme" title='{{ i18n "menu.settings" }}' placement="bottomRight" trigger="click">
+          <template #content>
+            <a-space direction="vertical" :size="10" style="min-width:180px">
+              <a-theme-switch-login></a-theme-switch-login>
+              <span style="font-size:12px">{{ i18n "pages.settings.language" }}</span>
+              <a-select ref="selectLang" class="w-100" v-model="lang" @change="LanguageManager.setLanguage(lang)" :dropdown-class-name="themeSwitcher.currentTheme">
+                <a-select-option :value="l.value" v-for="l in LanguageManager.supportedLanguages" :key="l.value">
+                  <span role="img" :aria-label="l.name" v-text="l.icon"></span>&nbsp;&nbsp;<span v-text="l.name"></span>
+                </a-select-option>
+              </a-select>
+            </a-space>
+          </template>
+          <button class="settings-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </a-popover>
+      </div>
+    </div>
+
+    <div class="sub-card">
+      <div class="sub-card-header">
+        <div class="sub-title-row">
+          <span class="sub-title">{{ i18n "subscription.title" }}</span>
+          <span class="sub-id-badge">[[ app.sId ]]</span>
+        </div>
+        <div class="status-hero">
+          <div v-if="isUnlimited" class="status-dot unlimited"></div>
+          <div v-else-if="isActive" class="status-dot active"></div>
+          <div v-else class="status-dot inactive"></div>
+          <span v-if="isUnlimited" class="status-text unlimited">{{ i18n "subscription.unlimited" }}</span>
+          <span v-else-if="isActive" class="status-text active">{{ i18n "subscription.active" }}</span>
+          <span v-else class="status-text inactive">{{ i18n "subscription.inactive" }}</span>
+        </div>
+      </div>
+
+      <div class="qr-section">
+        <div class="qr-block">
+          <div class="qr-label">{{ i18n "pages.settings.subSettings" }}</div>
+          <div class="qr-frame" @click="copyText(app.subUrl)">
+            <div class="qr-inner"><canvas id="qrcode" width="160" height="160"></canvas></div>
+          </div>
+          <div class="qr-hint">{{ i18n "copy" }}</div>
+        </div>
+        <div class="qr-block" v-if="app.subJsonUrl">
+          <div class="qr-label">{{ i18n "pages.settings.subSettings" }} JSON</div>
+          <div class="qr-frame" @click="copyText(app.subJsonUrl)">
+            <div class="qr-inner"><canvas id="qrcode-subjson" width="160" height="160"></canvas></div>
+          </div>
+          <div class="qr-hint">{{ i18n "copy" }}</div>
+        </div>
+      </div>
+
+      <div class="traffic-section" v-if="!isUnlimited && app.totalByte > 0">
+        <div class="section-label">Traffic Usage</div>
+        <div class="gauge-row">
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 110 110">
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#00f5ff"/>
+                  <stop offset="100%" stop-color="#bf5fff"/>
+                </linearGradient>
+              </defs>
+              <circle class="gauge-track" cx="55" cy="55" r="46"/>
+              <circle class="gauge-fill" cx="55" cy="55" r="46"
+                :style="{strokeDasharray: dasharray, strokeDashoffset: dashoffset}"/>
+            </svg>
+            <div class="gauge-center">
+              <span class="gauge-pct">[[ usedPct ]]%</span>
+              <span class="gauge-sub">used</span>
+            </div>
+          </div>
+          <div class="stat-bars">
+            <div>
+              <div class="stat-bar-header">
+                <span class="stat-bar-label">↓ {{ i18n "subscription.downloaded" }}</span>
+                <span class="stat-bar-val">[[ app.download ]]</span>
+              </div>
+              <div class="stat-bar-track"><div class="stat-bar-fill bar-down" :style="{width: downPct + '%'}"></div></div>
+            </div>
+            <div>
+              <div class="stat-bar-header">
+                <span class="stat-bar-label">↑ {{ i18n "subscription.uploaded" }}</span>
+                <span class="stat-bar-val">[[ app.upload ]]</span>
+              </div>
+              <div class="stat-bar-track"><div class="stat-bar-fill bar-up" :style="{width: upPct + '%'}"></div></div>
+            </div>
+            <div>
+              <div class="stat-bar-header">
+                <span class="stat-bar-label">∑ {{ i18n "usage" }}</span>
+                <span class="stat-bar-val">[[ app.used ]]</span>
+              </div>
+              <div class="stat-bar-track"><div class="stat-bar-fill bar-used" :style="{width: usedPct + '%'}"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="section-label">Account Details</div>
+        <div class="info-grid">
+          <div class="info-cell">
+            <div class="info-cell-label">{{ i18n "subscription.subId" }}</div>
+            <div class="info-cell-val">[[ app.sId ]]</div>
+          </div>
+          <div class="info-cell" v-if="app.totalByte > 0">
+            <div class="info-cell-label">{{ i18n "subscription.totalQuota" }}</div>
+            <div class="info-cell-val">[[ app.total ]]</div>
+          </div>
+          <div class="info-cell" v-if="app.totalByte > 0">
+            <div class="info-cell-label">{{ i18n "remained" }}</div>
+            <div class="info-cell-val" :style="{color: remainedColor}">[[ app.remained ]]</div>
+          </div>
+          <div class="info-cell">
+            <div class="info-cell-label">{{ i18n "lastOnline" }}</div>
+            <div class="info-cell-val" style="font-size:12px">
+              <template v-if="app.lastOnlineMs > 0">[[ IntlUtil.formatDate(app.lastOnlineMs) ]]</template>
+              <template v-else>—</template>
+            </div>
+          </div>
+          <div class="info-cell">
+            <div class="info-cell-label">{{ i18n "subscription.expiry" }}</div>
+            <div class="info-cell-val" style="font-size:12px">
+              <template v-if="app.expireMs === 0">{{ i18n "subscription.noExpiry" }}</template>
+              <template v-else>[[ IntlUtil.formatDate(app.expireMs) ]]</template>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="links-section" v-if="links && links.length > 0">
+        <div class="section-label">Subscription Links</div>
+        <div v-for="(link, idx) in links" :key="link" class="link-card" :id="'lc-' + idx" @click="copyLink(link, idx)">
+          <div class="link-card-inner">
+            <div class="link-card-header">
+              <span class="link-card-name">[[ linkName(link, idx) ]]</span>
+              <span class="link-copy-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                click to copy
+              </span>
+            </div>
+            <div class="link-url">[[ link ]]</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="apps-section">
+        <div class="section-label">Connect with App</div>
+        <div class="apps-grid">
+          <div class="app-btn-wrap">
+            <button class="app-btn android" @click.stop="toggleDropdown('android')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 0 1-2.18-2.18V9.17a2.18 2.18 0 1 1 4.36 0v4.29a2.18 2.18 0 0 1-2.18 2.18zm11.64 0a2.18 2.18 0 0 1-2.18-2.18V9.17a2.18 2.18 0 1 1 4.36 0v4.29a2.18 2.18 0 0 1-2.18 2.18zM15.36 6H8.64C8.64 3.79 10.09 2 12 2s3.36 1.79 3.36 4zm-8.72 0v12.5C6.64 19.88 7.76 21 9.14 21h5.72c1.38 0 2.5-1.12 2.5-2.5V6H6.64z"/></svg>
+              Android
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="app-dropdown" v-if="showDropdown === 'android'">
+              <div class="app-dropdown-item" @click="openUrl('v2box://install-sub?url=' + encodeURIComponent(app.subUrl) + '&name=' + encodeURIComponent(app.sId))">V2Box</div>
+              <div class="app-dropdown-item" @click="openUrl('v2rayng://install-config?url=' + encodeURIComponent(app.subUrl))">V2RayNG</div>
+              <div class="app-dropdown-item" @click="copyText(app.subUrl)">Sing-box</div>
+              <div class="app-dropdown-item" @click="copyText(app.subUrl)">V2RayTun</div>
+              <div class="app-dropdown-item" @click="copyText(app.subUrl)">NPV Tunnel</div>
+              <div class="app-dropdown-item" @click="openUrl('happ://add/' + app.subUrl)">Happ</div>
+            </div>
+          </div>
+          <div class="app-btn-wrap">
+            <button class="app-btn ios" @click.stop="toggleDropdown('ios')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              iOS
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="app-dropdown" v-if="showDropdown === 'ios'">
+              <div class="app-dropdown-item" @click="openUrl(shadowrocketUrl)">Shadowrocket</div>
+              <div class="app-dropdown-item" @click="openUrl(v2boxUrl)">V2Box</div>
+              <div class="app-dropdown-item" @click="openUrl(streisandUrl)">Streisand</div>
+              <div class="app-dropdown-item" @click="copyText(v2raytunUrl)">V2RayTun</div>
+              <div class="app-dropdown-item" @click="copyText(npvtunUrl)">NPV Tunnel</div>
+              <div class="app-dropdown-item" @click="openUrl(happUrl)">Happ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<template id="subscription-data"
+  data-sid="{{ .sId }}"
+  data-sub-url="{{ .subUrl }}"
+  data-subjson-url="{{ .subJsonUrl }}"
+  data-download="{{ .download }}"
+  data-upload="{{ .upload }}"
+  data-used="{{ .used }}"
+  data-total="{{ .total }}"
+  data-remained="{{ .remained }}"
+  data-expire="{{ .expire }}"
+  data-lastonline="{{ .lastOnline }}"
+  data-downloadbyte="{{ .downloadByte }}"
+  data-uploadbyte="{{ .uploadByte }}"
+  data-totalbyte="{{ .totalByte }}"
+  data-datepicker="{{ .datepicker }}"></template>
+<textarea id="subscription-links" style="display:none">{{ range .result }}{{ . }}
+{{ end }}</textarea>
+
+{{template "component/aThemeSwitch" .}}
+
+<script>
+(function(){
+  var c=document.getElementById('particle-canvas'),ctx=c.getContext('2d'),W,H,pts=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight}
+  function P(){this.reset()}
+  P.prototype.reset=function(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-.5)*.3;this.vy=(Math.random()-.5)*.3;this.r=Math.random()*1.5+.3;this.a=Math.random()*.5+.1;this.col=Math.random()>.5?'0,245,255':'191,95,255'};
+  P.prototype.update=function(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset()};
+  P.prototype.draw=function(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle='rgba('+this.col+','+this.a+')';ctx.fill()};
+  function init(){resize();pts=Array.from({length:80},function(){return new P()})}
+  function anim(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(function(p){p.update();p.draw()});
+    for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(0,245,255,'+(0.08*(1-d/120))+')';ctx.lineWidth=.6;ctx.stroke()}}
+    requestAnimationFrame(anim);
+  }
+  window.addEventListener('resize',resize);
+  init();anim();
+})();
+
+function showToast(m){var t=document.getElementById('copy-toast');if(m)t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000)}
+function copyToClipboard(text){if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){showToast('✓ Copied to clipboard')})}else{var el=document.createElement('textarea');el.value=text;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);showToast('✓ Copied to clipboard')}}
+</script>
+
+<script src="{{ .base_path }}assets/js/subscription.js?{{ .cur_ver }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  setTimeout(function(){
+    var appEl=document.getElementById('app');
+    if(!appEl||!appEl.__vue__)return;
+    var vm=appEl.__vue__;
+    var CIRC=2*Math.PI*46;
+    Object.defineProperty(vm,'usedPct',{get:function(){if(!this.app||this.app.totalByte<=0)return 0;return Math.min(Math.round((this.app.uploadByte+this.app.downloadByte)/this.app.totalByte*100),100)}});
+    Object.defineProperty(vm,'downPct',{get:function(){if(!this.app||this.app.totalByte<=0)return 0;return Math.min(Math.round(this.app.downloadByte/this.app.totalByte*100),100)}});
+    Object.defineProperty(vm,'upPct',{get:function(){if(!this.app||this.app.totalByte<=0)return 0;return Math.min(Math.round(this.app.uploadByte/this.app.totalByte*100),100)}});
+    Object.defineProperty(vm,'dasharray',{get:function(){return CIRC}});
+    Object.defineProperty(vm,'dashoffset',{get:function(){return CIRC-(CIRC*this.usedPct/100)}});
+    Object.defineProperty(vm,'remainedColor',{get:function(){var p=this.usedPct;if(p>=90)return'#ff3366';if(p>=70)return'#ffd700';return'#00ff88'}});
+    vm.$set(vm,'showDropdown',null);
+    vm.toggleDropdown=function(n){this.showDropdown=this.showDropdown===n?null:n};
+    vm.openUrl=function(u){window.open(u,'_blank');this.showDropdown=null};
+    vm.copyText=function(t){copyToClipboard(t)};
+    vm.copyLink=function(link,idx){copyToClipboard(link);var card=document.getElementById('lc-'+idx);if(card){card.classList.add('copied');setTimeout(function(){card.classList.remove('copied')},1500)}};
+    document.addEventListener('click',function(e){if(!e.target.closest('.app-btn-wrap'))vm.showDropdown=null});
+    if(typeof vm.copy==='function'){var oc=vm.copy.bind(vm);vm.copy=function(t){oc(t);showToast('✓ Copied to clipboard')}}
+  },300);
+});
+</script>
+
+{{ template "page/body_end" }}
